@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Funcionários</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .search-box {
+      max-width: 400px;
+      margin: 20px auto;
+      display: flex;
+      justify-content: center;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .employee-list {
+      max-width: 600px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+    }
+
+    .employee {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .employee:hover {
+      background: #f0f8ff;
+    }
+
+    .days {
+      margin-top: 8px;
+      padding-left: 15px;
+      color: #555;
+      font-size: 14px;
+      display: none;
+    }
+
+    .employee.active .days {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lista de Funcionários</h1>
+
+  <div class="search-box">
+    <input type="text" id="search" placeholder="Buscar funcionário pelo nome...">
+  </div>
+
+  <div class="employee-list" id="employeeList">
+    <!-- Funcionários serão renderizados aqui -->
+  </div>
+
+  <script>
+    const employees = [
+      { name: "Marcos", days: ["Segunda", "Terça", "Quarta"] },
+      { name: "Ana", days: ["Quarta", "Quinta", "Sexta"] },
+      { name: "Carlos", days: ["Segunda", "Quinta"] },
+      { name: "Fernanda", days: ["Terça", "Quarta", "Sexta"] },
+      { name: "João", days: ["Segunda", "Sexta"] }
+    ];
+
+    const employeeList = document.getElementById("employeeList");
+    const searchInput = document.getElementById("search");
+
+    // Função para renderizar funcionários
+    function renderEmployees(filter = "") {
+      employeeList.innerHTML = "";
+      employees
+        .filter(emp => emp.name.toLowerCase().includes(filter.toLowerCase()))
+        .forEach(emp => {
+          const div = document.createElement("div");
+          div.classList.add("employee");
+          div.innerHTML = `
+            <strong>${emp.name}</strong>
+            <div class="days">${emp.days.join(", ")}</div>
+          `;
+          div.addEventListener("click", () => {
+            div.classList.toggle("active");
+          });
+          employeeList.appendChild(div);
+        });
+    }
+
+    // Inicializa lista
+    renderEmployees();
+
+    // Busca em tempo real
+    searchInput.addEventListener("input", e => {
+      renderEmployees(e.target.value);
+    });
+  </script>
+</body>
+</html>
