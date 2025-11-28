@@ -1,119 +1,199 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Funcionários</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Colaboradores (UX Acordeão)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 1. Variáveis e Reset Básico */
+        :root {
+            --cor-primaria: #007bff; /* Azul vibrante para destaque */
+            --cor-fundo: #f4f7f6;
+            --cor-card: #ffffff;
+            --cor-texto: #333333;
+            --cor-detalhe-fundo: #eaf1f8; /* Fundo suave para os detalhes */
+            --sombra-leve: 0 4px 8px rgba(0, 0, 0, 0.08);
+            --transicao-suave: all 0.4s ease-in-out;
+        }
 
-    h1 {
-      text-align: center;
-      color: #333;
-    }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
 
-    .search-box {
-      max-width: 400px;
-      margin: 20px auto;
-      display: flex;
-      justify-content: center;
-    }
+        .container {
+            width: 100%;
+            max-width: 600px;
+        }
 
-    .search-box input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
-    }
+        h1 {
+            text-align: center;
+            color: var(--cor-primaria);
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
 
-    .employee-list {
-      max-width: 600px;
-      margin: 20px auto;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      padding: 20px;
-    }
+        /* 2. Estilo da Lista (Grid) */
+        .lista-colaboradores {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 12px; /* Espaço entre os cartões */
+        }
 
-    .employee {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
+        .colaborador-item {
+            background-color: var(--cor-card);
+            border-radius: 10px;
+            box-shadow: var(--sombra-leve);
+            overflow: hidden; /* Importante para o efeito 'acordeão' */
+            cursor: pointer;
+            transition: var(--transicao-suave);
+            border-left: 5px solid transparent; /* Linha de destaque */
+        }
+        
+        /* Efeito Hover e Ativo */
+        .colaborador-item:hover {
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+            border-left: 5px solid var(--cor-primaria);
+        }
 
-    .employee:hover {
-      background: #f0f8ff;
-    }
+        .colaborador-item.ativo {
+            border-left: 5px solid var(--cor-primaria);
+        }
 
-    .days {
-      margin-top: 8px;
-      padding-left: 15px;
-      color: #555;
-      font-size: 14px;
-      display: none;
-    }
+        .nome-colaborador {
+            padding: 15px 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Indicador de Acordeão (opcional: seta) */
+        .nome-colaborador::after {
+            content: '▼';
+            font-size: 0.7em;
+            transition: transform 0.3s;
+            color: var(--cor-primaria);
+        }
+        .colaborador-item.ativo .nome-colaborador::after {
+            transform: rotate(180deg);
+        }
 
-    .employee.active .days {
-      display: block;
-    }
-  </style>
+        /* 3. Estilo dos Detalhes (Acordeão) */
+        .detalhes {
+            background-color: var(--cor-detalhe-fundo);
+            padding: 0 20px;
+            font-size: 0.95em;
+            font-weight: 400;
+            color: #555555;
+            
+            /* **Chave do Efeito Acordeão** */
+            max-height: 0;
+            opacity: 0;
+            transition: max-height var(--transicao-suave), opacity var(--transicao-suave), padding 0.4s;
+            overflow: hidden;
+        }
+
+        /* Classe para mostrar os detalhes */
+        .colaborador-item.ativo .detalhes {
+            max-height: 100px; /* Deve ser maior que o conteúdo, mas não 'none' */
+            opacity: 1;
+            padding: 15px 20px;
+        }
+    </style>
 </head>
 <body>
-  <h1>Lista de Funcionários</h1>
+    <div class="container">
+        <h1>👥 Colaboradores & Detalhes de Trabalho</h1>
+        <ul id="lista-colaboradores" class="lista-colaboradores">
+            </ul>
+    </div>
 
-  <div class="search-box">
-    <input type="text" id="search" placeholder="Buscar funcionário pelo nome...">
-  </div>
+    <script>
+        // 1. Dados
+        const dadosColaboradores = [
+            { nome: 'RUDNEI', detalhes: '21 DIAS | CS' },
+            { nome: 'URIEL', detalhes: '25 DIAS | CS' },
+            { nome: 'CAPOEIRA', detalhes: '20 DIAS | CS' },
+            { nome: 'FLORISVALDO', detalhes: '18 DIAS | CS' },
+            { nome: 'EVANDRO', detalhes: '19 DIAS | CS' },
+            { nome: 'GABRIEL', detalhes: '04 DIAS | MAIS UM IA ATÉ 12:00 HO' },
+            { nome: 'JOÃO GERSO', detalhes: '01 DIA' },
+            { nome: 'RUBENS', detalhes: '26 DIAS | CS' },
+            { nome: 'ALBERT', detalhes: '22 DIAS | CS' },
+            { nome: 'RAI', detalhes: '14 DIAS | CS' },
+            { nome: 'RUDNEI', detalhes: '17 DIAS | CS' },
+            { nome: 'LUIZ', detalhes: '20 DIAS | CS' },
+            { nome: 'HUMBERTO', detalhes: '08 DIAS | CS' },
+            { nome: 'HILBERT', detalhes: '07 DIAS | CS' },
+            { nome: 'JAIRO', detalhes: '04 DIAS | CS' },
+            { nome: 'EVERTON', detalhes: '20 DIAS | CS' },
+            { nome: 'BAFAFA', detalhes: '19 DIAS | CS' },
+            { nome: 'CLAUDIO', detalhes: '22 DIAS | CS' },
+            { nome: 'ALAN', detalhes: '07 DIAS | CS' },
+            { nome: 'SAMUEL', detalhes: '16 DIAS | CS' },
+            { nome: 'RENILSON', detalhes: '07 DIAS | CS' },
+            { nome: 'DANIEL', detalhes: '19 DIAS | CS' }
+        ];
 
-  <div class="employee-list" id="employeeList">
-    <!-- Funcionários serão renderizados aqui -->
-  </div>
+        const listaUL = document.getElementById('lista-colaboradores');
 
-  <script>
-    const employees = [
-      { name: "Marcos", days: ["Segunda", "Terça", "Quarta"] },
-      { name: "Ana", days: ["Quarta", "Quinta", "Sexta"] },
-      { name: "Carlos", days: ["Segunda", "Quinta"] },
-      { name: "Fernanda", days: ["Terça", "Quarta", "Sexta"] },
-      { name: "João", days: ["Segunda", "Sexta"] }
-    ];
+        // 2. Geração Dinâmica do HTML
+        function gerarListaHTML() {
+            dadosColaboradores.forEach(colaborador => {
+                const li = document.createElement('li');
+                li.classList.add('colaborador-item');
+                
+                // Div para o Nome (Parte sempre visível)
+                const nomeDiv = document.createElement('div');
+                nomeDiv.classList.add('nome-colaborador');
+                nomeDiv.textContent = colaborador.nome;
+                
+                // Div para os Detalhes (Parte oculta - Acordeão)
+                const detalhesDiv = document.createElement('div');
+                detalhesDiv.classList.add('detalhes');
+                detalhesDiv.textContent = colaborador.detalhes;
 
-    const employeeList = document.getElementById("employeeList");
-    const searchInput = document.getElementById("search");
+                li.appendChild(nomeDiv);
+                li.appendChild(detalhesDiv);
+                listaUL.appendChild(li);
+            });
+        }
+        
+        // Chamada para criar os elementos
+        gerarListaHTML();
 
-    // Função para renderizar funcionários
-    function renderEmployees(filter = "") {
-      employeeList.innerHTML = "";
-      employees
-        .filter(emp => emp.name.toLowerCase().includes(filter.toLowerCase()))
-        .forEach(emp => {
-          const div = document.createElement("div");
-          div.classList.add("employee");
-          div.innerHTML = `
-            <strong>${emp.name}</strong>
-            <div class="days">${emp.days.join(", ")}</div>
-          `;
-          div.addEventListener("click", () => {
-            div.classList.toggle("active");
-          });
-          employeeList.appendChild(div);
+        // 3. Lógica de Interatividade (UX - Acordeão)
+        listaUL.addEventListener('click', (evento) => {
+            // Usa .closest('li') para garantir que pegamos o item principal, mesmo clicando no nome-colaborador
+            const itemClicado = evento.target.closest('.colaborador-item');
+
+            if (itemClicado) {
+                const isAtivo = itemClicado.classList.contains('ativo');
+                
+                // Fecha todos os outros itens ativos para evitar múltiplos detalhes abertos
+                document.querySelectorAll('.colaborador-item.ativo').forEach(item => {
+                    item.classList.remove('ativo');
+                });
+
+                // Se o item clicado não estava ativo, ative-o agora
+                if (!isAtivo) {
+                    itemClicado.classList.add('ativo');
+                }
+            }
         });
-    }
-
-    // Inicializa lista
-    renderEmployees();
-
-    // Busca em tempo real
-    searchInput.addEventListener("input", e => {
-      renderEmployees(e.target.value);
-    });
-  </script>
+    </script>
 </body>
 </html>
